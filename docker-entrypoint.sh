@@ -19,14 +19,18 @@ else
     echo "auto.create.topics.enable=${KRAFT_AUTO_CREATE_TOPICS}" >> $properties_file;
 fi
 
+if [ -z $KRAFT_ADVERTISE_HOST_NAME ]; then
+    KRAFT_ADVERTISE_HOST_NAME=localhost
+fi
+
 if [ -z $KRAFT_CONTAINER_HOST_NAME ]; then
     echo "listeners=CONTROLLER://:19092,EXTERNAL://:9093" >> $properties_file;
-    echo "advertised.listeners=EXTERNAL://localhost:9093" >> $properties_file;
+    echo "advertised.listeners=EXTERNAL://${KRAFT_ADVERTISE_HOST_NAME}:9093" >> $properties_file;
     echo "inter.broker.listener.name=EXTERNAL" >> $properties_file;
     echo "listener.security.protocol.map=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT" >> $properties_file;
 else
     echo "listeners=CONTROLLER://:19092,INTERNAL://:9092,EXTERNAL://:9093" >> $properties_file;
-    echo "advertised.listeners=INTERNAL://${KRAFT_CONTAINER_HOST_NAME}:9092,EXTERNAL://localhost:9093" >> $properties_file;
+    echo "advertised.listeners=INTERNAL://${KRAFT_CONTAINER_HOST_NAME}:9092,EXTERNAL://${KRAFT_ADVERTISE_HOST_NAME}:9093" >> $properties_file;
     echo "inter.broker.listener.name=EXTERNAL" >> $properties_file;
     echo "listener.security.protocol.map=CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT" >> $properties_file;
 fi
@@ -62,5 +66,5 @@ else
     echo "==> ✅ Requested topics created.";
 fi
 
-
+echo "==> Connect to Kafka at ${KRAFT_ADVERTISE_HOST_NAME}:9093"
 wait "$child";
